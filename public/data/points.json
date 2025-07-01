@@ -1,0 +1,30 @@
+[
+  {
+    "id": "einstein1905",
+    "name": "Les travaux d'Einstein en 1905",
+    "date": "1905-06-30",
+    "coords": [7.4474, 46.9481],
+    "category": "sciences",
+    "subcategory": "physique",
+    "type": "article",
+    "image": "/images/atlantis.jpg",
+    "link": "/articles/einstein1905",
+    "relatedBefore": ["relativite1887"],
+    "relatedAfter": ["quantique1925"],
+    "relatedOther": ["mariecurie1903"]
+  },
+  {
+    "id": "bluewhale2020",
+    "name": "La baleine bleue dans le Pacifique",
+    "date": "2020-04-12",
+    "coords": [-130.0, -10.0],
+    "category": "nature",
+    "subcategory": "faune",
+    "type": "article",
+    "image": "/images/bluewhale.jpg",
+    "link": "/articles/bluewhale2020",
+    "relatedBefore": ["whale1965"],
+    "relatedAfter": ["whaleextinct2040"],
+    "relatedOther": ["dolphins2015"]
+  }
+]

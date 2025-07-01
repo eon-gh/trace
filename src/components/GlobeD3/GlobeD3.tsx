@@ -1,15 +1,49 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
 import worldData from "../../data/world-110m.json";
-import { points } from "../../data/points";
+// import { points } from "../../data/points";
 import { getColor } from "./utils";
 import { useProjection } from "./useProjection";
+import type { PointData } from "./types";
+import ArticleModal from "../ArticleModal";
+
 
 const GlobeD3 = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const [points, setPoints] = useState<PointData[]>([]);
+  const [activeArticleId, setActiveArticleId] = useState<string | null>(null);
+  const [articleContent, setArticleContent] = useState<string | null>(null);
+
 
   useEffect(() => {
+    if (!activeArticleId) return;
+
+    fetch(`/articles/${activeArticleId}.md`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Article non trouvé");
+        return res.text();
+      })
+      .then((text) => {
+        setArticleContent(text);
+      })
+      .catch((err) => {
+        console.error("Erreur lors du chargement de l'article :", err);
+        setArticleContent(null);
+      });
+  }, [activeArticleId]);
+
+
+  useEffect(() => {
+    fetch("/data/points.json")
+      .then((res) => res.json())
+      .then((data) => setPoints(data))
+      .catch((err) => console.error("Erreur chargement points:", err));
+  }, []);
+
+  useEffect(() => {
+    if (!svgRef.current || points.length === 0) return;
+
     const width = 800;
     const height = 800;
 
@@ -106,7 +140,7 @@ const GlobeD3 = () => {
           .attr("cx", x)
           .attr("cy", y)
           .attr("r", 5)
-          .style("fill", getColor(point.type))
+          .style("fill", getColor(point.category))
           .style("stroke", "#fff")
           .style("stroke-width", 0.7)
           .style("cursor", "pointer")
@@ -133,17 +167,17 @@ const GlobeD3 = () => {
               .style("transform", "translateY(0px)");
           })
           .on("click", function () {
-            window.open(point.link, "_blank");
+            setActiveArticleId(point.id); // Id du markdown à charger
           });
 
-        // 🌊 Cercle pulsant
+        // Pulsation
         pulse
           .append("circle")
           .attr("cx", x)
           .attr("cy", y)
           .attr("r", 4)
           .style("fill", "none")
-          .style("stroke", getColor(point.type))
+          .style("stroke", getColor(point.category))
           .style("stroke-width", 1)
           .style("opacity", 0.8)
           .transition()
@@ -213,11 +247,20 @@ const GlobeD3 = () => {
     return () => {
       tooltip.remove();
     };
-  }, []);
+  }, [points]);
 
   return (
     <div className="flex justify-center items-center w-full h-full">
       <svg ref={svgRef}></svg>
+      {activeArticleId && articleContent && (
+        <ArticleModal
+          content={articleContent}
+          onClose={() => {
+            setActiveArticleId(null);
+            setArticleContent(null);
+          }}
+        />
+      )}
     </div>
   );
 };

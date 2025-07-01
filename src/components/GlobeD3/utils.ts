@@ -1,8 +1,8 @@
 // components/GlobeD3/utils.ts
 
-export function getColor(type: string): string {
-  switch (type) {
-    case "civilization":
+export function getColor(category: string): string {
+  switch (category) {
+    case "sciences":
       return "#FFB703";
     case "species":
       return "#8ECAE6";
