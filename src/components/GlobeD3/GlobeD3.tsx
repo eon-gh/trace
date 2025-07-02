@@ -2,18 +2,23 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
 import worldData from "../../data/world-110m.json";
-// import { points } from "../../data/points";
 import { getColor } from "./utils";
 import { useProjection } from "./useProjection";
 import type { PointData } from "./types";
 import ArticleModal from "../ArticleModal";
-
+import FilterBar from "../FilterBar";
+import DateRangeSlider from "../DateRangeSlider";
 
 const GlobeD3 = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const navigateToArticleRef = useRef<(id: string) => void>(() => {});
   const [points, setPoints] = useState<PointData[]>([]);
   const [activeArticleId, setActiveArticleId] = useState<string | null>(null);
   const [articleContent, setArticleContent] = useState<string | null>(null);
+  const [filters, setFilters] = useState<{ category?: string; subcategory?: string }>({});
+  const [dateRange, setDateRange] = useState<[number, number]>([1880, 2025]);
+
+
 
 
   useEffect(() => {
@@ -33,7 +38,7 @@ const GlobeD3 = () => {
       });
   }, [activeArticleId]);
 
-
+  // Fetch points data
   useEffect(() => {
     fetch("/data/points.json")
       .then((res) => res.json())
@@ -41,6 +46,7 @@ const GlobeD3 = () => {
       .catch((err) => console.error("Erreur chargement points:", err));
   }, []);
 
+  // Draw globe and points
   useEffect(() => {
     if (!svgRef.current || points.length === 0) return;
 
@@ -54,20 +60,17 @@ const GlobeD3 = () => {
       .style("background", "radial-gradient(#0a0a0a, #000)")
       .style("border-radius", "100%");
 
-    svg.selectAll("*").remove(); // clean rerenders
+    svg.selectAll("*").remove();
 
     const { projection, path, graticule } = useProjection(width, height);
-
     const g = svg.append("g");
 
-    // 🌊 Ocean shading circle
     g.append("circle")
       .attr("cx", width / 2)
       .attr("cy", height / 2)
       .attr("r", projection.scale()!)
       .attr("fill", "url(#ocean)");
 
-    // 🌀 Ocean gradient
     svg
       .append("defs")
       .append("radialGradient")
@@ -82,7 +85,6 @@ const GlobeD3 = () => {
       .attr("offset", (d) => d.offset)
       .attr("stop-color", (d) => d.color);
 
-    // 🌐 Graticule
     g.append("path")
       .datum(graticule)
       .attr("fill", "none")
@@ -90,7 +92,6 @@ const GlobeD3 = () => {
       .attr("stroke-width", 0.5)
       .attr("d", path);
 
-    // 🗺️ Countries
     const countries = feature(worldData as any, (worldData as any).objects.countries);
     g.selectAll("path.countries")
       .data(countries.features)
@@ -102,39 +103,57 @@ const GlobeD3 = () => {
       .attr("stroke-width", 0.3)
       .attr("opacity", 0.9);
 
-    // ✨ Points
     const pulse = svg.append("g");
 
     function drawPoints() {
       pulse.selectAll("*").remove();
 
+
+
       const tooltip = d3.select("#tooltip");
+      if (tooltip.empty()) {
+        d3.select("body")
+          .append("div")
+          .attr("id", "tooltip")
+          .style("position", "absolute")
+          .style("background", "rgba(15, 23, 42, 0.8)")
+          .style("backdrop-filter", "blur(6px)")
+          .style("color", "#f8fafc")
+          .style("font-size", "0.875rem")
+          .style("border-radius", "12px")
+          .style("pointer-events", "none")
+          .style("opacity", 0)
+          .style("transform", "translateY(0px)")
+          .style("transition", "opacity 0.3s ease, transform 0.3s ease")
+          .style("box-shadow", "0 8px 24px rgba(0, 0, 0, 0.4)")
+          .style("width", "220px")
+          .style("z-index", "1000");
+      }
 
-    if (tooltip.empty()) {
-      d3.select("body")
-        .append("div")
-        .attr("id", "tooltip")
-        .style("position", "absolute")
-        .style("background", "rgba(15, 23, 42, 0.8)") // fond sombre semi-transparent
-        .style("backdrop-filter", "blur(6px)")        // effet verre dépoli
-        .style("color", "#f8fafc")
-        .style("font-size", "0.875rem")
-        .style("border-radius", "12px")
-        .style("pointer-events", "none")
-        .style("opacity", 0)
-        .style("transform", "translateY(0px)")
-        .style("transition", "opacity 0.3s ease, transform 0.3s ease")
-        .style("box-shadow", "0 8px 24px rgba(0, 0, 0, 0.4)")
-        .style("width", "220px")
-        .style("z-index", "1000");
-    }
+      points
+      .filter((point) => {
+        if (filters.category && point.category !== filters.category) return false;
+        if (filters.subcategory && point.subcategory !== filters.subcategory) return false;
+        return true;
+      })
+      .filter((point) => {
+        if (filters.category && point.category !== filters.category) return false;
+        if (filters.subcategory && point.subcategory !== filters.subcategory) return false;
 
-      points.forEach((point) => {
+        const year = new Date(point.date).getFullYear();
+        if (year < dateRange[0] || year > dateRange[1]) return false;
+
+        return true;
+      })
+      .forEach((point) => {
         if (!isPointVisible(point.coords, projection)) return;
+        const dispersedCoords = getDispersedCoords(point.coords, points, point);
+        const [x, y] = projection(dispersedCoords)!;
+        const overlapping = points.filter(p =>
+          p.coords[0] === point.coords[0] && p.coords[1] === point.coords[1]
+        );
+        const isOverlapping = overlapping.length > 1;
 
-        const [x, y] = projection(point.coords)!;
-
-        // 🌟 Cercle principal, maintenant cliquable
         pulse
           .append("circle")
           .attr("cx", x)
@@ -148,12 +167,13 @@ const GlobeD3 = () => {
             d3.select(this).transition().attr("r", 8);
             d3.select("#tooltip")
               .style("opacity", 1)
-              .style("transform", "translateY(-10px)") // effet montée
+              .style("transform", "translateY(-10px)")
               .html(`
                 <div style="display:flex; flex-direction: column; gap: 6px;">
                   <img src="${point.image}" alt="${point.name}" style="width: 100%; height: auto; border-radius: 12px 12px 0 0;"/>
                   <div style="padding: 10px;">
                     <strong style="font-size: 1rem;">${point.name}</strong>
+                    ${isOverlapping ? `<small style="color:#aaa;">${overlapping.length} points proches</small>` : ""}
                   </div>
                 </div>
               `)
@@ -167,10 +187,9 @@ const GlobeD3 = () => {
               .style("transform", "translateY(0px)");
           })
           .on("click", function () {
-            setActiveArticleId(point.id); // Id du markdown à charger
+            setActiveArticleId(point.id);
           });
 
-        // Pulsation
         pulse
           .append("circle")
           .attr("cx", x)
@@ -199,28 +218,9 @@ const GlobeD3 = () => {
       });
     }
 
-
-
-
     drawPoints();
 
-    // Tooltip
-    const tooltip = d3
-      .select("body")
-      .append("div")
-      .style("position", "absolute")
-      .style("padding", "6px 12px")
-      .style("background", "#0f172a")
-      .style("color", "#f8fafc")
-      .style("font-size", "0.875rem")
-      .style("border-radius", "8px")
-      .style("pointer-events", "none")
-      .style("opacity", 0)
-      .style("box-shadow", "0 4px 12px rgba(0,0,0,0.3)");
-
-    // 🌐 Drag rotate
     const rotation = { lon: 0, lat: 0 };
-
     svg.call(
       d3
         .drag<SVGSVGElement, unknown>()
@@ -230,67 +230,115 @@ const GlobeD3 = () => {
           rotation.lat = lat;
         })
         .on("drag", (event) => {
-          const sensitivity = 0.25; // Ajuste cette valeur si nécessaire
-          const dx = event.dx * sensitivity;
-          const dy = event.dy * sensitivity;
-
-          // Applique les nouvelles valeurs avec limite de latitude
+          const dx = event.dx * 0.25;
+          const dy = event.dy * 0.25;
           rotation.lon += dx;
-          rotation.lat = Math.max(-90, Math.min(90, rotation.lat - dy)); // clamp lat
-
+          rotation.lat = Math.max(-90, Math.min(90, rotation.lat - dy));
           projection.rotate([rotation.lon, rotation.lat]);
           svg.selectAll("path").attr("d", path);
-          drawPoints(); // redraw points
+          drawPoints();
         })
     );
 
-    return () => {
-      tooltip.remove();
+    // 🔁 Fonction de rotation vers un point
+    function rotateToTarget(targetCoords: [number, number], callback: () => void) {
+      const [targetLon, targetLat] = targetCoords;
+      const currentRotation = projection.rotate();
+      const interpolator = d3.interpolate(currentRotation, [-targetLon, -targetLat]);
+
+      d3.transition()
+        .duration(2000)
+        .tween("rotate", () => (t) => {
+          projection.rotate(interpolator(t));
+          svg.selectAll("path").attr("d", path);
+          drawPoints();
+        })
+        .on("end", callback);
+    }
+
+    // 🔁 Navigation inter-articles
+    navigateToArticleRef.current = (targetId: string) => {
+      const targetPoint = points.find((p) => p.id === targetId);
+      if (!targetPoint) return;
+
+      setActiveArticleId(null);
+      setArticleContent(null);
+      setTimeout(() => {
+        rotateToTarget(targetPoint.coords, () => {
+          setActiveArticleId(targetPoint.id);
+        });
+      }, 300);
     };
-  }, [points]);
+
+    return () => {
+      d3.select("#tooltip").remove();
+    };
+  }, [points, filters, dateRange]);
 
   return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div className="flex justify-center items-center w-full h-full" style={{flexDirection:'column'}}>
+      <FilterBar   
+        filters={filters}
+        setFilters={setFilters}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+      />
+
       <svg ref={svgRef}></svg>
       {activeArticleId && articleContent && (
-        <ArticleModal
-          content={articleContent}
-          onClose={() => {
-            setActiveArticleId(null);
-            setArticleContent(null);
-          }}
-        />
+      <ArticleModal
+        content={articleContent}
+        onClose={() => setActiveArticleId(null)}
+        onNavigate={(id) => navigateToArticleRef.current(id)}
+        relatedBefore={points.find(p => p.id === activeArticleId)?.relatedBefore?.[0]}
+        relatedAfter={points.find(p => p.id === activeArticleId)?.relatedAfter?.[0]}
+      />
       )}
     </div>
   );
 };
 
-export default GlobeD3;
 
 
-
+// ✅ Visibilité d’un point sur le globe
 function isPointVisible([lon, lat]: [number, number], projection: d3.GeoProjection): boolean {
-  const [λ0, φ0] = projection.rotate(); // Rotation du globe
-
-  // Convertir en radians
+  const [λ0, φ0] = projection.rotate();
   const λ = lon * (Math.PI / 180);
   const φ = lat * (Math.PI / 180);
-
   const λr = -λ0 * (Math.PI / 180);
   const φr = -φ0 * (Math.PI / 180);
 
-  // Vecteur du point en coordonnées sphériques → cartésiennes
   const x = Math.cos(φ) * Math.cos(λ);
   const y = Math.cos(φ) * Math.sin(λ);
   const z = Math.sin(φ);
 
-  // Vecteur "vue caméra" (direction face visible)
   const cx = Math.cos(φr) * Math.cos(λr);
   const cy = Math.cos(φr) * Math.sin(λr);
   const cz = Math.sin(φr);
 
-  // Produit scalaire
   const dot = x * cx + y * cy + z * cz;
-
   return dot > 0;
 }
+function getDispersedCoords(
+  baseCoords: [number, number],
+  allPoints: PointData[],
+  point: PointData
+): [number, number] {
+  const overlapping = allPoints.filter(p =>
+    p.coords[0] === baseCoords[0] && p.coords[1] === baseCoords[1]
+  );
+
+  if (overlapping.length <= 1) return baseCoords;
+
+  const index = overlapping.findIndex(p => p.id === point.id);
+  const angle = (index / overlapping.length) * 2 * Math.PI;
+  const radius = 0.4; // 0.4° de dispersion maximum (~44km)
+
+  const lonOffset = radius * Math.cos(angle);
+  const latOffset = radius * Math.sin(angle);
+
+  return [baseCoords[0] + lonOffset, baseCoords[1] + latOffset];
+}
+
+
+export default GlobeD3;
