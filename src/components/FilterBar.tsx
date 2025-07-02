@@ -62,7 +62,7 @@ const FilterBar = ({ filters, setFilters, dateRange, setDateRange }: FilterBarPr
         <button
           onClick={() => {
             setFilters({});
-            setDateRange([1880, 2025]);
+            setDateRange([1789, 2025]);
           }}
           className="self-start mt-5 p-2 rounded bg-zinc-800 border border-zinc-600 hover:border-cyan-500 transition duration-200"
           title="Réinitialiser les filtres"
@@ -75,7 +75,7 @@ const FilterBar = ({ filters, setFilters, dateRange, setDateRange }: FilterBarPr
       <div className="flex flex-col gap-1 mt-1">
 
         <DateRangeSlider
-          minYear={1880}
+          minYear={1789}
           maxYear={2025}
           range={dateRange}
           onChange={setDateRange}

@@ -12,8 +12,8 @@ const DateRangeSlider = ({ minYear, maxYear, range, onChange }: DateRangeSliderP
     <div className="w-full px-2">
 
 
-        <div className="uppercase tracking-wider text-xs text-zinc-400 mb-2 font-mono">
-          Période temporelle : <span className="text-cyan-400">{range[0]}</span> – <span className="text-cyan-400">{range[1]}</span>
+        <div className="uppercase tracking-wider text-xs text-zinc-400 mb-5 font-mono">
+          Période contemporaine : <span className="text-cyan-400">{formatYear(range[0])}</span> – <span className="text-cyan-400">{formatYear(range[1])}</span>
         </div>
 
       <Range
@@ -60,5 +60,13 @@ const DateRangeSlider = ({ minYear, maxYear, range, onChange }: DateRangeSliderP
     </div>
   );
 };
+
+function formatYear(year: number): string {
+  if (year < -1_000_000) return `${Math.abs(year / 1_000_000)} M.a.`; // millions d'années
+  if (year < -10_000) return `${Math.abs(year / 1_000)} k.a.`; // milliers d'années
+  if (year < 0) return `${Math.abs(year)} av. J.-C.`;
+  return `${year}`;
+}
+
 
 export default DateRangeSlider;

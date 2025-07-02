@@ -16,7 +16,7 @@ const GlobeD3 = () => {
   const [activeArticleId, setActiveArticleId] = useState<string | null>(null);
   const [articleContent, setArticleContent] = useState<string | null>(null);
   const [filters, setFilters] = useState<{ category?: string; subcategory?: string }>({});
-  const [dateRange, setDateRange] = useState<[number, number]>([1880, 2025]);
+  const [dateRange, setDateRange] = useState<[number, number]>([1789, 2025]);
 
 
 
@@ -276,7 +276,8 @@ const GlobeD3 = () => {
   }, [points, filters, dateRange]);
 
   return (
-    <div className="flex justify-center items-center w-full h-full" style={{flexDirection:'column'}}>
+    <div className="flex justify-center items-center w-full h-full" 
+    style={{flexDirection:'column', marginTop:'150px', overflow:'hidden'}}>
       <FilterBar   
         filters={filters}
         setFilters={setFilters}
