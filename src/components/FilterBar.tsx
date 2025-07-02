@@ -67,9 +67,11 @@ const FilterBar = ({
   };
 
   return (
-    <div className="fixed top-6 left-1/2 transform -translate-x-1/2 backdrop-blur-md bg-zinc-900/80 border border-zinc-700 rounded-2xl px-8 py-6 shadow-2xl z-50 min-w-[460px] max-w-[540px] flex flex-col gap-6 font-mono text-sm text-zinc-200">
-      {/* Reset */}
-      <div className="flex justify-end">
+    <div className="fixed top-6 right-6 backdrop-blur-md bg-zinc-900/80 border border-zinc-700 rounded-2xl px-8 py-6 shadow-2xl z-50 min-w-[460px] max-w-[540px] flex flex-col gap-6 font-mono text-sm text-zinc-200">
+      {/* Reset left-1/2 transform -translate-x-1/2  */}
+
+      <div className="flex justify-between">
+        <h1>Trace On Earth</h1>
         <button
           onClick={handleReset}
           className="p-2 rounded bg-zinc-800 border border-zinc-600 hover:border-cyan-500 transition duration-200"
@@ -119,45 +121,60 @@ const FilterBar = ({
       {/* Périodes */}
       <div className="flex flex-col gap-1">
         <label className="uppercase tracking-wider text-xs text-zinc-400">Périodes</label>
-        <Select
-          isMulti
-          options={periodOptions}
-          value={selectedOptions}
-          onChange={handlePeriodChange}
-          className="text-black text-sm"
-          styles={{
-            control: (base) => ({
-              ...base,
-              backgroundColor: "#1e293b",
-              borderColor: "#334155",
-              color: "#f8fafc",
-              fontSize: "0.85rem",
-            }),
-            menu: (base) => ({
-              ...base,
-              backgroundColor: "#1e293b",
-              color: "#f8fafc",
-              zIndex: 9999,
-            }),
-            multiValue: (base) => ({
-              ...base,
-              backgroundColor: "#0e7490",
-              color: "#fff",
-            }),
-            multiValueLabel: (base) => ({
-              ...base,
-              color: "#fff",
-            }),
-            multiValueRemove: (base) => ({
-              ...base,
-              color: "#fff",
-              ':hover': {
-                backgroundColor: "#f87171",
-                color: "white",
-              },
-            }),
-          }}
-        />
+          <Select
+            isMulti
+            options={periodOptions}
+            value={selectedOptions}
+            onChange={handlePeriodChange}
+            className="text-black text-sm"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: "#1e293b",
+                borderColor: "#334155",
+                color: "#f8fafc",
+                fontSize: "0.85rem",
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: "#1e293b",
+                color: "#f8fafc",
+                zIndex: 9999,
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isFocused
+                  ? "#334155" // couleur de fond au survol (gris-bleu foncé)
+                  : state.isSelected
+                  ? "#0ea5e9" // couleur quand sélectionné
+                  : "transparent",
+                color: "#f8fafc",
+                cursor: "pointer",
+              }),
+              multiValue: (base) => ({
+                ...base,
+                backgroundColor: "#0e7490",
+                color: "#fff",
+              }),
+              multiValueLabel: (base) => ({
+                ...base,
+                color: "#fff",
+              }),
+              multiValueRemove: (base) => ({
+                ...base,
+                color: "#fff",
+                ':hover': {
+                  backgroundColor: "#f87171",
+                  color: "white",
+                },
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: "#f8fafc",
+              }),
+            }}
+          />
+
       </div>
 
       {/* Slider */}

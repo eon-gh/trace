@@ -8,6 +8,7 @@ import type { PointData } from "./types";
 import ArticleModal from "../ArticleModal";
 import FilterBar from "../FilterBar";
 import { historicalPeriods } from "../../data/historicalPeriods";
+import StoryNavigator from "../StoryNavigator";
 
 const GlobeD3 = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -73,8 +74,7 @@ const GlobeD3 = () => {
       .select(svgRef.current)
       .attr("width", width)
       .attr("height", height)
-      .style("background", "radial-gradient(#0a0a0a, #000)")
-      .style("border-radius", "100%");
+
 
     svg.selectAll("*").remove();
 
@@ -323,7 +323,7 @@ const GlobeD3 = () => {
   return (
     <div
       className="flex justify-center items-center w-full h-full"
-      style={{ flexDirection: "column", marginTop: "150px", overflow: "hidden" }}
+      style={{ flexDirection: "column", marginTop: "300px", overflow: "hidden", marginBottom:'300px' }}
     >
       <FilterBar
         filters={filters}
@@ -349,6 +349,15 @@ const GlobeD3 = () => {
           relatedAfter={points.find((p) => p.id === activeArticleId)?.relatedAfter?.[0]}
         />
       )}
+      <StoryNavigator
+        onSelectStory={(pointId) => navigateToArticleRef.current(pointId)}
+        resetFilters={() => {
+          setFilters({});
+          setSelectedPeriods([]);
+          setDateRange([-3000000, 2025]);
+        }}
+      />
+
     </div>
   );
 

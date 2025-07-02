@@ -1,0 +1,16 @@
+[
+  {
+    "storyName": "Histoire de l'écriture",
+    "description": "Des pictogrammes à l’ère numérique",
+    "category": "histoire",
+    "subcategory": "civilisation",
+    "startPoint": "relativite1887"
+  },
+  {
+    "storyName": "Évolution des oiseaux",
+    "description": "De dinosaures à vol d’aile",
+    "category": "nature",
+    "subcategory": "faune",
+    "startPoint": "dodo1598"
+  }
+]
