@@ -7,7 +7,7 @@ import { useProjection } from "./useProjection";
 import type { PointData } from "./types";
 import ArticleModal from "../ArticleModal";
 import FilterBar from "../FilterBar";
-import DateRangeSlider from "../DateRangeSlider";
+import { historicalPeriods } from "../../data/historicalPeriods";
 
 const GlobeD3 = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -16,10 +16,26 @@ const GlobeD3 = () => {
   const [activeArticleId, setActiveArticleId] = useState<string | null>(null);
   const [articleContent, setArticleContent] = useState<string | null>(null);
   const [filters, setFilters] = useState<{ category?: string; subcategory?: string }>({});
-  const [dateRange, setDateRange] = useState<[number, number]>([1789, 2025]);
+  const defaultPeriod = historicalPeriods.find(p => p.label === "Anthropocène - Époque contemporaine");
+
+  const [selectedPeriods, setSelectedPeriods] = useState<string[]>(
+    defaultPeriod ? [defaultPeriod.label] : []
+  );
+
+  const [dateRange, setDateRange] = useState<[number, number]>(
+    defaultPeriod ? [defaultPeriod.start, defaultPeriod.end] : [-3000000, 2025]
+  );
 
 
 
+  useEffect(() => {
+    const selected = historicalPeriods.filter((p) => selectedPeriods.includes(p.label));
+    if (selected.length > 0) {
+      const min = Math.min(...selected.map((p) => p.start));
+      const max = Math.max(...selected.map((p) => p.end));
+      setDateRange([min, max]);
+    }
+  }, [selectedPeriods]);
 
   useEffect(() => {
     if (!activeArticleId) return;
@@ -132,16 +148,21 @@ const GlobeD3 = () => {
 
       points
       .filter((point) => {
-        if (filters.category && point.category !== filters.category) return false;
-        if (filters.subcategory && point.subcategory !== filters.subcategory) return false;
-        return true;
-      })
-      .filter((point) => {
+        // Catégorie
         if (filters.category && point.category !== filters.category) return false;
         if (filters.subcategory && point.subcategory !== filters.subcategory) return false;
 
-        const year = new Date(point.date).getFullYear();
-        if (year < dateRange[0] || year > dateRange[1]) return false;
+        // Périodes
+        if (selectedPeriods.length > 0) {
+          const match = selectedPeriods.some(periodLabel => {
+            const period = historicalPeriods.find(p => p.label === periodLabel);
+            return period && point.year >= period.start && point.year <= period.end;
+          });
+          if (!match) return false;
+        }
+
+        // Plage temporelle (slider)
+        if (point.year < dateRange[0] || point.year > dateRange[1]) return false;
 
         return true;
       })
@@ -215,7 +236,9 @@ const GlobeD3 = () => {
               .style("stroke-opacity", 0)
               .on("end", repeat);
           });
+          console.log(point.name, point.category, point.year);
       });
+      
     }
 
     drawPoints();
@@ -275,28 +298,60 @@ const GlobeD3 = () => {
     };
   }, [points, filters, dateRange]);
 
+  // 🔁 Calcul dynamique minYear / maxYear
+  const selectedPeriodRanges = selectedPeriods
+    .map((label) => historicalPeriods.find((p) => p.label === label))
+    .filter((p): p is { start: number; end: number } => !!p);
+
+  const minYear = selectedPeriodRanges.length
+    ? Math.min(...selectedPeriodRanges.map((p) => p.start))
+    : -3000000;
+
+  const maxYear = selectedPeriodRanges.length
+    ? Math.max(...selectedPeriodRanges.map((p) => p.end))
+    : 2025;
+
+
+  const periodOptions = historicalPeriods.map((p) => ({
+    value: p.label,
+    label: p.label,
+  }));
+
+  const selectedOptions = periodOptions.filter((opt) =>
+    selectedPeriods.includes(opt.value)
+  );
   return (
-    <div className="flex justify-center items-center w-full h-full" 
-    style={{flexDirection:'column', marginTop:'150px', overflow:'hidden'}}>
-      <FilterBar   
+    <div
+      className="flex justify-center items-center w-full h-full"
+      style={{ flexDirection: "column", marginTop: "150px", overflow: "hidden" }}
+    >
+      <FilterBar
         filters={filters}
         setFilters={setFilters}
         dateRange={dateRange}
         setDateRange={setDateRange}
+        selectedPeriods={selectedPeriods}
+        setSelectedPeriods={setSelectedPeriods}
+        minYear={minYear}
+        maxYear={maxYear}
+        periodOptions={periodOptions}
+        selectedOptions={selectedOptions}
       />
 
       <svg ref={svgRef}></svg>
+
       {activeArticleId && articleContent && (
-      <ArticleModal
-        content={articleContent}
-        onClose={() => setActiveArticleId(null)}
-        onNavigate={(id) => navigateToArticleRef.current(id)}
-        relatedBefore={points.find(p => p.id === activeArticleId)?.relatedBefore?.[0]}
-        relatedAfter={points.find(p => p.id === activeArticleId)?.relatedAfter?.[0]}
-      />
+        <ArticleModal
+          content={articleContent}
+          onClose={() => setActiveArticleId(null)}
+          onNavigate={(id) => navigateToArticleRef.current(id)}
+          relatedBefore={points.find((p) => p.id === activeArticleId)?.relatedBefore?.[0]}
+          relatedAfter={points.find((p) => p.id === activeArticleId)?.relatedAfter?.[0]}
+        />
       )}
     </div>
   );
+
 };
 
 

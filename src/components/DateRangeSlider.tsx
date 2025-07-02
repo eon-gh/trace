@@ -13,7 +13,7 @@ const DateRangeSlider = ({ minYear, maxYear, range, onChange }: DateRangeSliderP
 
 
         <div className="uppercase tracking-wider text-xs text-zinc-400 mb-5 font-mono">
-          Période contemporaine : <span className="text-cyan-400">{formatYear(range[0])}</span> – <span className="text-cyan-400">{formatYear(range[1])}</span>
+          Période : <span className="text-cyan-400">{formatYear(range[0])}</span> – <span className="text-cyan-400">{formatYear(range[1])}</span>
         </div>
 
       <Range
