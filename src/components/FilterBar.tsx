@@ -67,7 +67,8 @@ const FilterBar = ({
   };
 
   return (
-    <div className="fixed top-6 right-6 backdrop-blur-md bg-zinc-900/80 border border-zinc-700 rounded-2xl px-8 py-6 shadow-2xl z-50 min-w-[460px] max-w-[540px] flex flex-col gap-6 font-mono text-sm text-zinc-200">
+    <div className="fixed top-6 right-0 backdrop-blur-md bg-zinc-900/80 border border-zinc-700 rounded-2xl px-8 py-6 shadow-2xl z-50 min-w-[460px] max-w-[540px] flex flex-col gap-6 font-mono text-sm text-zinc-200"
+    style={{margin:'0 10px 0 10px'}}>
       {/* Reset left-1/2 transform -translate-x-1/2  */}
 
       <div className="flex justify-between">
@@ -92,7 +93,7 @@ const FilterBar = ({
           >
             <option value="">Toutes</option>
             {Object.keys(categories).map((cat) => (
-              <option key={cat} value={cat}>
+              <option key={cat} value={cat} className="text-xs">
                 {cat}
               </option>
             ))}

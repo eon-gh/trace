@@ -9,6 +9,8 @@ import ArticleModal from "../ArticleModal";
 import FilterBar from "../FilterBar";
 import { historicalPeriods } from "../../data/historicalPeriods";
 import StoryNavigator from "../StoryNavigator";
+import SupportModal from "../SupportModal";
+
 
 const GlobeD3 = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -323,7 +325,7 @@ const GlobeD3 = () => {
   return (
     <div
       className="flex justify-center items-center w-full h-full"
-      style={{ flexDirection: "column", marginTop: "300px", overflow: "hidden", marginBottom:'300px' }}
+      style={{ flexDirection: "column", marginTop: "500px", overflow: "hidden", marginBottom:'300px' }}
     >
       <FilterBar
         filters={filters}
@@ -357,7 +359,7 @@ const GlobeD3 = () => {
           setDateRange([-3000000, 2025]);
         }}
       />
-
+      <SupportModal/>
     </div>
   );
 

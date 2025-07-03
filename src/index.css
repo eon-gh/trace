@@ -2,3 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* index.css */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #18181b; /* zinc-900 */
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #52525b; /* zinc-700 */
+  border-radius: 8px;
+}

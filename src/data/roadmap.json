@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Ajout d’histoires audio",
+    "description": "Narrations vocales immersives pour accompagner certains points.",
+    "category": "contenu",
+    "timeframe": "court-terme"
+  },
+  {
+    "title": "Mode “exploration guidée”",
+    "description": "Permettre aux utilisateurs de suivre des récits étape par étape.",
+    "category": "UX",
+    "timeframe": "court-terme"
+  },
+  {
+    "title": "Ajout de récits spéculatifs",
+    "description": "Intégrer des fictions ou futurs possibles basés sur des tendances actuelles.",
+    "category": "contenu",
+    "timeframe": "moyen-terme"
+  },
+  {
+    "title": "Système de favoris et carnet personnel",
+    "description": "Permettre de sauvegarder des points et de noter ses impressions.",
+    "category": "UX",
+    "timeframe": "moyen-terme"
+  },
+  {
+    "title": "Migration vers Next.js",
+    "description": "Optimisation des performances et du SEO.",
+    "category": "technique",
+    "timeframe": "moyen-terme"
+  },
+  {
+    "title": "Outil de contribution",
+    "description": "Permettre à d’autres personnes de proposer des points et récits.",
+    "category": "collaboration",
+    "timeframe": "moyen-terme"
+  },
+  {
+    "title": "Application mobile",
+    "description": "Explorer les traces en mobilité, en mode hors-ligne.",
+    "category": "technique",
+    "timeframe": "long-terme"
+  },
+  {
+    "title": "Traduction multilingue",
+    "description": "Rendre TRACE accessible à d’autres langues et cultures.",
+    "category": "contenu",
+    "timeframe": "long-terme"
+  },
+  {
+    "title": "Lancement du Patreon",
+    "description": "Proposer un soutien mensuel pour accélérer le développement.",
+    "category": "financement",
+    "timeframe": "court-terme"
+  },
+  {
+    "title": "Partenariats artistiques et scientifiques",
+    "description": "Créer des récits en collaboration avec chercheurs et artistes sensibles.",
+    "category": "collaboration",
+    "timeframe": "long-terme"
+  }
+]

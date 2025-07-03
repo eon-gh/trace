@@ -57,7 +57,7 @@ const StoryNavigator = ({ onSelectStory, resetFilters }: StoryNavigatorProps) =>
       {/* Bouton Play */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 backdrop-blur-md bg-zinc-900/80 border border-zinc-700 hover:bg-cyan-700 text-white p-3 rounded-full shadow-lg transition duration-300"
+        className="fixed bottom-20 right-6 z-50 backdrop-blur-md bg-zinc-900/80 border border-zinc-700 hover:bg-cyan-700 text-white p-3 rounded-full shadow-lg transition duration-300"
         title="Explorer une histoire"
       >
         <img src={PlayIcon} alt="Play" className="w-5 h-5" />
