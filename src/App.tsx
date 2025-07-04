@@ -3,7 +3,7 @@ import GlobeD3 from "./components/GlobeD3/GlobeD3";
 import BackgroundParticles from "./components/BackgroundParticules";
 import NavigationBar from "./components/NavigationBar";
 import About from "./pages/About";
-
+import SoundModal from "./components/SoundModal";
 
 export default function App() {
   return (
@@ -16,6 +16,7 @@ export default function App() {
           
         </Routes>
         <NavigationBar />
+        <SoundModal/>
       </div>
     </BrowserRouter>
   );

@@ -83,6 +83,14 @@ const ArticleModal = ({
         )}
         </div>
 
+        <iframe
+          src="https://www.youtube.com/embed/UnCeRajvwps?rel=0&autoplay=1"
+          className="w-full h-64 rounded-lg"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+
+
         {/* Contenu markdown */}
         <div className="prose dark:prose-invert max-w-none markdown-body">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
